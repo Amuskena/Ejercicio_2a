@@ -15,24 +15,23 @@ const fetchCharacter = async (name) => {
 		const res = await fetch ("https://rickandmortyapi.com/api/character/?name=" + name + "&status=alive");
 		const data = await res.json();
 		console.log(data);
-		mostrarResultados(data);
+		mostrarResultados(data.results);
 
 	} catch (error) {
 		console.log(error);
 	}
 };
 
-const mostrarResultados = (resultados) => {
-	const appNode = document.getElementById("app");
-	const resultadosNode = document.createElement("ul");
+// COMPROBAR SI EL NOMBRE DEL PERSONAJE EXISTE
 
-	resultadosNode.id = "resultados";
-	appNode.appendChild(resultadosNode);
+const mostrarResultados = (episodes) => {		
+	const episodesNode = document.getElementById("lista");
 
-	resultados.forEach(resultado => {
-		const resultadoNode = document.createElement("li");
-		resultadoNode.id = "resultado" + resultado.name;
-		resultadoNode.innerHTML = resultado.name;
-		resultadoNode.appendChild(resultadoNode);
+	episodes.forEach(episode => {
+		const episodeNode = document.createElement("li");
+		episodeNode.id = "episode" + episode.name;
+		episodeNode.innerHTML = episode.name;
+		episodesNode.appendChild(episodeNode);
 	});
+	
 }
