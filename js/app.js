@@ -1,7 +1,3 @@
-let aparece = false;
-let personajesEpisodio = [];
-let resultados = [];
-
 document.addEventListener('DOMContentLoaded', async () => {
     const myInput = document.getElementById('busqueda');
 	myInput.addEventListener('keyup', function() {
@@ -20,78 +16,31 @@ const fetchCharacter = async (name) => {
 		borrarLista();
 		const res = await fetch ("https://rickandmortyapi.com/api/character/?name=" + name + "&status=alive");
 		const data = await res.json();
-		console.log(data);
+		//console.log(data);
+
+		let personajes = [];
+		let episodios = [];
+		data.results.forEach(item => {
+			personajes.push(item.name);
+			//episodios.push(item.episode);
+			item.episode.forEach(ep => {
+				//console.log("Episodio " + ep);
+				episodios.push(ep);
+			});
+		});
 
 		const episodesNode = document.getElementById("lista");
-		data.results.forEach(resultado => {
-			resultados.push(resultado.episode);			
-			//console.log("RESULTADO: " + resultado.episode);
+		for (let i in episodios){
+			//console.log(episodios[i]);
 			const episodeNode = document.createElement("li");
-			episodeNode.id = "episode" + resultado.name;
-			episodeNode.innerHTML = resultado.episode;
+			episodeNode.innerHTML = episodios[i];
 			episodesNode.appendChild(episodeNode);
-			//console.log("LI - " + resultado.episode.name);
-		});
-		aparece = true;
+		}
 
 	} catch (error) {
-		//console.log(error);
-		aparece = false;
 		console.log("No hemos encontrado el personaje.");
 	}
 };
-
-
-const comprobarPersonaje = (nombre,episodes) => {	
-	try {
-		const personaje = nombre.toLowerCase();
-		
-		/*episodes.forEach(episode => {
-			//console.log("Personajes: " + episode.name);
-			personajesEpisodio.push(episode.name);
-		});*/
-		const episodesNode = document.getElementById("lista");
-		episodes.forEach(episode => {
-			const episodeNode = document.createElement("li");
-			episodeNode.id = "episode" + episode.name;
-			episodeNode.innerHTML = episode.name;
-			/*if (episode.name.toLowerCase() == personaje){
-				episodesNode.appendChild(episode.episode.name);
-			}*/
-			episodesNode.appendChild(episodeNode);
-		});
-		return true;
-	} catch (error){
-		return false;
-	}	
-}
-
-const mostrarPersonajes = (episodes) => {		
-	const episodesNode = document.getElementById("lista");
-	for(let p in episodes){
-			//console.log("Nombre:" + episodes[p]);
-			const episodeNode = document.createElement("li");
-			episodesNode.appendChild(episodes[p]);
-		}
-}
-
-const mostrarResultados = (episodes) => {		
-	const episodesNode = document.getElementById("lista");
-	episodes.forEach(episode => {
-		const episodeNode = document.createElement("li");
-		episodeNode.id = "episode" + episode.name;
-		episodeNode.innerHTML = episode.name;
-		episodesNode.appendChild(episodeNode);
-	});
-}
-
-const removeEpisodes = () => {
-	const episodesNode = document.getElementById("lista");
-
-	if (episodesNode) {
-		episodesNode.remove();
-	}
-}
 
 const borrarLista = () => {
 	if (document.querySelector('li')){
@@ -105,6 +54,47 @@ const borrarLista = () => {
 			    l.remove();
 			}
 	}
-
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
