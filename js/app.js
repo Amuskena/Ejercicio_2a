@@ -8,9 +8,17 @@ document.addEventListener('DOMContentLoaded', async () => {
 
 async function handlerInputChange(inputValue){
 	const characterEpisodesApiUrls = await fetchCharacterEpisodesApiUrls(inputValue);
-	console.log('characterEpisodesApiUrls', characterEpisodesApiUrls);
+
+	if (!characterEpisodesApiUrls) {
+		return;
+	}
+
 	const charactersEpisodes = await fetchEpisodes(characterEpisodesApiUrls);
-	console.log('charactersEpisodes', charactersEpisodes);
+
+	if (!charactersEpisodes) {
+		return;
+	}
+
 	renderEpisodes(charactersEpisodes);
 }
 
@@ -19,6 +27,7 @@ const renderEpisodes = (episodes) => {
 
 	for (let i in episodes){
 		const episodeNode = document.createElement("li");
+
 		episodeNode.innerHTML = episodes[i].name;
 		episodesNode.appendChild(episodeNode);
 	}
@@ -34,6 +43,10 @@ const fetchEpisode = async (characterEpisodeApiUrl) => {
 }
 
 const fetchEpisodes = async (characterEpisodesApiUrls) => {
+	if (!characterEpisodesApiUrls || characterEpisodesApiUrls.length <= 0){
+		return;
+	}
+
 	const charactersEpisodes = [];
 
 	for (const characterEpisodeApiUrl of characterEpisodesApiUrls) {
@@ -49,6 +62,11 @@ const fetchCharacterEpisodesApiUrls = async (name) => {
 		clearCharacterEpisodesNode();
 
 		const res = await fetch (`https://rickandmortyapi.com/api/character/?name=${name}&status=alive`);
+
+		if (!res) {
+			return;
+		}
+
 		const data = await res.json();
 
 		let episodesApiUrls = [];
@@ -61,7 +79,7 @@ const fetchCharacterEpisodesApiUrls = async (name) => {
 
 		return episodesApiUrls;
 	} catch (error) {
-		console.log("No hemos encontrado el personaje.");
+		console.log("No hemos encontrado el personaje.", error);
 	}
 };
 
