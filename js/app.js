@@ -1,58 +1,80 @@
 document.addEventListener('DOMContentLoaded', async () => {
-    const myInput = document.getElementById('busqueda');
-	myInput.addEventListener('keyup', function() {
-	     handlerInputChange(myInput.value);
+  const myInputNode = document.getElementById('busqueda');
+
+	myInputNode.addEventListener('keyup', function(e) {
+	  handlerInputChange(e.target.value);
 	});
 });
 
-async function handlerInputChange(v){
-	console.log(v);
-	await fetchCharacter(v);
-	
+async function handlerInputChange(inputValue){
+	const characterEpisodesApiUrls = await fetchCharacterEpisodesApiUrls(inputValue);
+	console.log('characterEpisodesApiUrls', characterEpisodesApiUrls);
+	const charactersEpisodes = await fetchEpisodes(characterEpisodesApiUrls);
+	console.log('charactersEpisodes', charactersEpisodes);
+	renderEpisodes(charactersEpisodes);
 }
 
-const fetchCharacter = async (name) => {
-	try {
-		borrarLista();
-		const res = await fetch ("https://rickandmortyapi.com/api/character/?name=" + name + "&status=alive");
-		const data = await res.json();
-		//console.log(data);
+const renderEpisodes = (episodes) => {
+	const episodesNode = document.getElementById("lista");
 
-		let personajes = [];
-		let episodios = [];
+	for (let i in episodes){
+		const episodeNode = document.createElement("li");
+		episodeNode.innerHTML = episodes[i].name;
+		episodesNode.appendChild(episodeNode);
+	}
+}
+
+const fetchEpisode = async (characterEpisodeApiUrl) => {
+	try {
+		const res = await fetch(characterEpisodeApiUrl);
+		return await res.json();
+	} catch (error) {
+		console.log(error);
+	}
+}
+
+const fetchEpisodes = async (characterEpisodesApiUrls) => {
+	const charactersEpisodes = [];
+
+	for (const characterEpisodeApiUrl of characterEpisodesApiUrls) {
+		const characterEpisode = await fetchEpisode(characterEpisodeApiUrl);
+		charactersEpisodes.push(characterEpisode);
+	}
+
+	return charactersEpisodes;
+}
+
+const fetchCharacterEpisodesApiUrls = async (name) => {
+	try {
+		clearCharacterEpisodesNode();
+
+		const res = await fetch (`https://rickandmortyapi.com/api/character/?name=${name}&status=alive`);
+		const data = await res.json();
+
+		let episodesApiUrls = [];
+
 		data.results.forEach(item => {
-			personajes.push(item.name);
-			//episodios.push(item.episode);
-			item.episode.forEach(ep => {
-				//console.log("Episodio " + ep);
-				episodios.push(ep);
-			});
+			if (item.name === name) {
+				episodesApiUrls = [...episodesApiUrls, ...item.episode];
+			}
 		});
 
-		const episodesNode = document.getElementById("lista");
-		for (let i in episodios){
-			//console.log(episodios[i]);
-			const episodeNode = document.createElement("li");
-			episodeNode.innerHTML = episodios[i];
-			episodesNode.appendChild(episodeNode);
-		}
-
+		return episodesApiUrls;
 	} catch (error) {
 		console.log("No hemos encontrado el personaje.");
 	}
 };
 
-const borrarLista = () => {
-	if (document.querySelector('li')){
-			document.getElementById("lista").innerHTML = '';
-	}
+const clearCharacterEpisodesNode = () => {
+	document.getElementById("lista").innerHTML = '';
+
 	if (document.getElementById('busqueda').value == ''){
-			document.getElementById("lista").innerHTML = '';
-			const li = document.querySelectorAll(".list-item-class");
-			for(let i = 0; i <= li.length; i++ ){
-			    l = li[i];
-			    l.remove();
-			}
+		const li = document.querySelectorAll(".list-item-class");
+
+		for(let i = 0; i <= li.length; i++ ){
+			l = li[i];
+			l.remove();
+		}
 	}
 }
 
