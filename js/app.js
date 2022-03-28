@@ -72,7 +72,7 @@ const fetchCharacterEpisodesApiUrls = async (name) => {
 		let episodesApiUrls = [];
 
 		data.results.forEach(item => {
-			if (item.name === name) {
+			if (item.name.toLowerCase() === name.toLowerCase()) {
 				episodesApiUrls = [...episodesApiUrls, ...item.episode];
 			}
 		});
