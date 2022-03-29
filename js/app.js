@@ -1,12 +1,32 @@
 document.addEventListener('DOMContentLoaded', async () => {
   const myInputNode = document.getElementById('busqueda');
 
-	myInputNode.addEventListener('keyup', function(e) {
+	/*myInputNode.addEventListener('keyup', function(e) {
 	  handlerInputChange(e.target.value);
-	});
+	});*/
+
+	const debouncedSearch = debounce(handlerInputChange, 500);
+	myInputNode.addEventListener('keyup', debouncedSearch);
 });
 
+// PUNTO DE GUARDADO
+
+const debounce = (func, delay = 200) => {
+  let timeoutId;
+  return function() {
+    clearTimeout(timeoutId);
+    timeoutId = setTimeout(() => {
+      func.apply(this, arguments);
+    }, delay);
+  }
+};
+
+function search(evt) {
+  console.log(this.value);
+}
+
 async function handlerInputChange(inputValue){
+	inputValue = this.value;
 	const characterEpisodesApiUrls = await fetchCharacterEpisodesApiUrls(inputValue);
 
 	if (!characterEpisodesApiUrls) {
@@ -95,6 +115,7 @@ const clearCharacterEpisodesNode = () => {
 		}
 	}
 }
+
 
 
 
