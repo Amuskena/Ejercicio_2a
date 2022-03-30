@@ -1,17 +1,15 @@
 document.addEventListener('DOMContentLoaded', async () => {
   const myInputNode = document.getElementById('busqueda');
 
-	/*myInputNode.addEventListener('keyup', function(e) {
+	myInputNode.addEventListener('keyup', function(e) {
 	  handlerInputChange(e.target.value);
-	});*/
+	});
 
-	const debouncedSearch = debounce(handlerInputChange, 500);
-	myInputNode.addEventListener('keyup', debouncedSearch);
+	/*const debouncedSearch = debounce(handlerInputChange, 500);
+	myInputNode.addEventListener('keyup', debouncedSearch);*/
 });
 
-// PUNTO DE GUARDADO
-
-const debounce = (func, delay = 200) => {
+/*const debounce = (func, delay = 200) => {
   let timeoutId;
   return function() {
     clearTimeout(timeoutId);
@@ -19,14 +17,25 @@ const debounce = (func, delay = 200) => {
       func.apply(this, arguments);
     }, delay);
   }
-};
+};*/
 
-function search(evt) {
-  console.log(this.value);
+async function fetchWithTimeout(resource, options = {}) {
+  const { timeout = 5000 } = options;
+  
+  const abortController = new AbortController();
+  const id = setTimeout(() => abortController.abort(), timeout);
+  const response = await fetch(resource, {
+    ...options,
+    signal: abortController.signal  
+  });
+  clearTimeout(id);
+  return response;
 }
 
+// PUNTO DE GUARDADO 3
+
 async function handlerInputChange(inputValue){
-	inputValue = this.value;
+	//inputValue = this.value;
 	const characterEpisodesApiUrls = await fetchCharacterEpisodesApiUrls(inputValue);
 
 	if (!characterEpisodesApiUrls) {
@@ -81,7 +90,10 @@ const fetchCharacterEpisodesApiUrls = async (name) => {
 	try {
 		clearCharacterEpisodesNode();
 
-		const res = await fetch (`https://rickandmortyapi.com/api/character/?name=${name}&status=alive`);
+		//const res = await fetch (`https://rickandmortyapi.com/api/character/?name=${name}&status=alive`);
+    const res = await fetchWithTimeout(`https://rickandmortyapi.com/api/character/?name=${name}&status=alive`, {
+      timeout: 5000
+    });
 
 		if (!res) {
 			return;
