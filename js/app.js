@@ -1,161 +1,134 @@
-document.addEventListener('DOMContentLoaded', async () => {
-  const myInputNode = document.getElementById('busqueda');
-
-	/*myInputNode.addEventListener('keyup', function(e) {
-	  handlerInputChange(e.target.value);
-	});*/
-
-	const debouncedSearch = debounce(handlerInputChange, 500);
-	myInputNode.addEventListener('keyup', debouncedSearch);
+document.addEventListener("DOMContentLoaded", async () => {
+  let controller;
+  const myInputNode = document.getElementById("busqueda");
+  const myButton = document.getElementById("cancelar");
+  const debouncedSearch = debounce(handlerInputChange, 500);
+  
+  myInputNode.addEventListener("keyup", debouncedSearch);
+  myButton.addEventListener("click", () => handlerCancel(controller));
 });
 
-// PUNTO DE GUARDADO
+function handlerCancel(ctrler) {
+  if (!ctrler?.abort) {
+    return;
+  }
 
-const debounce = (func, delay = 200) => {
+  ctrler.abort();
+}
+
+function debounce(func, delay = 200) {
   let timeoutId;
-  return function() {
+
+  return function () {
     clearTimeout(timeoutId);
     timeoutId = setTimeout(() => {
       func.apply(this, arguments);
     }, delay);
-  }
-};
-
-function search(evt) {
-  console.log(this.value);
+  };
 }
 
-async function handlerInputChange(inputValue){
-	inputValue = this.value;
-	const characterEpisodesApiUrls = await fetchCharacterEpisodesApiUrls(inputValue);
+async function handlerInputChange(inputValue) {
+  controller = new AbortController();
+  const signal = controller.signal;
 
-	if (!characterEpisodesApiUrls) {
-		return;
-	}
+  inputValue = this.value;
 
-	const charactersEpisodes = await fetchEpisodes(characterEpisodesApiUrls);
+  const characterEpisodesApiUrls = await fetchCharacterEpisodesApiUrls(
+    inputValue,
+    signal
+  );
 
-	if (!charactersEpisodes) {
-		return;
-	}
+  if (!characterEpisodesApiUrls) {
+    return;
+  }
 
-	renderEpisodes(charactersEpisodes);
+  const charactersEpisodes = await fetchEpisodes(
+    characterEpisodesApiUrls,
+    signal
+  );
+
+  console.log(charactersEpisodes);
+
+  if (!charactersEpisodes) {
+    return;
+  }
+
+  renderEpisodes(charactersEpisodes);
 }
 
 const renderEpisodes = (episodes) => {
-	const episodesNode = document.getElementById("lista");
+  const episodesNode = document.getElementById("lista");
 
-	for (let i in episodes){
-		const episodeNode = document.createElement("li");
+  for (let i in episodes) {
+    const episodeNode = document.createElement("li");
 
-		episodeNode.innerHTML = episodes[i].name;
-		episodesNode.appendChild(episodeNode);
-	}
-}
+    episodeNode.innerHTML = episodes[i]?.name;
+    episodesNode.appendChild(episodeNode);
+  }
+};
 
-const fetchEpisode = async (characterEpisodeApiUrl) => {
-	try {
-		const res = await fetch(characterEpisodeApiUrl);
-		return await res.json();
-	} catch (error) {
-		console.log(error);
-	}
-}
+const fetchEpisode = async (characterEpisodeApiUrl, signal) => {
+  try {
+    const res = await fetch(characterEpisodeApiUrl, { signal });
+    return await res.json();
+  } catch (error) {
+    console.log(error);
+  }
+};
 
-const fetchEpisodes = async (characterEpisodesApiUrls) => {
-	if (!characterEpisodesApiUrls || characterEpisodesApiUrls.length <= 0){
-		return;
-	}
+const fetchEpisodes = async (characterEpisodesApiUrls, signal) => {
+  if (!characterEpisodesApiUrls || characterEpisodesApiUrls.length <= 0) {
+    return;
+  }
 
-	const charactersEpisodes = [];
+  const charactersEpisodes = [];
 
-	for (const characterEpisodeApiUrl of characterEpisodesApiUrls) {
-		const characterEpisode = await fetchEpisode(characterEpisodeApiUrl);
-		charactersEpisodes.push(characterEpisode);
-	}
+  for (const characterEpisodeApiUrl of characterEpisodesApiUrls) {
+    const characterEpisode = await fetchEpisode(characterEpisodeApiUrl, signal);
+    charactersEpisodes.push(characterEpisode);
+  }
 
-	return charactersEpisodes;
-}
+  return charactersEpisodes;
+};
 
-const fetchCharacterEpisodesApiUrls = async (name) => {
-	try {
-		clearCharacterEpisodesNode();
+const fetchCharacterEpisodesApiUrls = async (name, signal) => {
+  try {
+    clearCharacterEpisodesNode();
 
-		const res = await fetch (`https://rickandmortyapi.com/api/character/?name=${name}&status=alive`);
+    const res = await fetch(
+      `https://rickandmortyapi.com/api/character/?name=${name}&status=alive`,
+      { signal }
+    );
 
-		if (!res) {
-			return;
-		}
+    if (!res) {
+      return;
+    }
 
-		const data = await res.json();
+    const data = await res.json();
 
-		let episodesApiUrls = [];
+    let episodesApiUrls = [];
 
-		data.results.forEach(item => {
-			if (item.name.toLowerCase() === name.toLowerCase()) {
-				episodesApiUrls = [...episodesApiUrls, ...item.episode];
-			}
-		});
+    data.results.forEach((item) => {
+      if (item.name.toLowerCase() === name.toLowerCase()) {
+        episodesApiUrls = [...episodesApiUrls, ...item.episode];
+      }
+    });
 
-		return episodesApiUrls;
-	} catch (error) {
-		console.log("No hemos encontrado el personaje.", error);
-	}
+    return episodesApiUrls;
+  } catch (error) {
+    console.log("No hemos encontrado el personaje.", error);
+  }
 };
 
 const clearCharacterEpisodesNode = () => {
-	document.getElementById("lista").innerHTML = '';
+  document.getElementById("lista").innerHTML = "";
 
-	if (document.getElementById('busqueda').value == ''){
-		const li = document.querySelectorAll(".list-item-class");
+  if (document.getElementById("busqueda").value === "") {
+    const li = document.querySelectorAll(".list-item-class");
 
-		for(let i = 0; i <= li.length; i++ ){
-			l = li[i];
-			l.remove();
-		}
-	}
-}
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+    for (let i = 0; i <= li.length; i++) {
+      let l = li[i];
+      l.remove();
+    }
+  }
+};
