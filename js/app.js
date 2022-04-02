@@ -3,7 +3,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   const myInputNode = document.getElementById("busqueda");
   const myButton = document.getElementById("cancelar");
   const debouncedSearch = debounce(handlerInputChange, 500);
-  
+
   myInputNode.addEventListener("keyup", debouncedSearch);
   myButton.addEventListener("click", () => handlerCancel(controller));
 });
@@ -96,7 +96,7 @@ const fetchCharacterEpisodesApiUrls = async (name, signal) => {
     clearCharacterEpisodesNode();
 
     const res = await fetch(
-      `https://rickandmortyapi.com/api/character/?name=${name}&status=alive`,
+      encodeURI(`https://rickandmortyapi.com/api/character/?name=${name}&status=alive`),
       { signal }
     );
 
